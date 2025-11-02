@@ -64,10 +64,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\AutoRebuildManager.cs" />
-    <Compile Include="Source\Config\Class1.cs" />
+    <Compile Include="Source\Config\AutoRebuildSettings.cs" />
     <Compile Include="Source\Patch_DestroyFence.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\Startup.cs" />
+    <Compile Include="Source\HarmonyInit.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assemblies\" />

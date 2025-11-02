@@ -1,113 +1,83 @@
-﻿using RimWorld;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Verse;
+using RimWorld;
 
 namespace EthanV.AutoRebuildFence
 {
     public class AutoRebuildManager : MapComponent
     {
         private readonly List<(IntVec3 pos, ThingDef def, ThingDef stuff)> rebuildQueue = new();
-        public bool Active;
+        private bool active;
         private int nextCheckTick;
 
         public AutoRebuildManager(Map map) : base(map) { }
 
-        /// <summary>
-        /// 他MOD含むフェンス・ゲート・動物出入口を判定
-        /// </summary>
-        public static bool IsTargetDef(ThingDef def)
+        public void RegisterDestroyed(Thing destroyed)
         {
-            if (def == null) return false;
-            if (def.category != ThingCategory.Building) return false;
+            if (destroyed?.def == null) return;
+            if (!AutoRebuildSettings.IsTargetDef(destroyed.def)) return;
 
-            string name = def.defName.ToLowerInvariant();
-            string label = def.label?.ToLowerInvariant() ?? "";
+            rebuildQueue.Add((destroyed.Position, destroyed.def, destroyed.Stuff));
 
-            return name.Contains("fence")
-                || name.Contains("gate")
-                || name.Contains("animalflap")
-                || label.Contains("フェンス")
-                || label.Contains("ゲート")
-                || label.Contains("出入口");
-        }
+            if (AutoRebuildSettings.DebugMode)
+                Log.Message($"[AutoRebuildFence] Registered rebuild for {destroyed.def.defName} at {destroyed.Position}");
 
-        /// <summary>
-        /// 壊れた建築物の登録（解体・消滅以外のみ）
-        /// </summary>
-        public void RegisterDestroyedStructure(IntVec3 pos, ThingDef def, ThingDef stuff, DestroyMode mode)
-        {
-            if (mode == DestroyMode.Deconstruct || mode == DestroyMode.Vanish) return;
-            if (!IsTargetDef(def)) return;
-
-            if (!rebuildQueue.Any(r => r.pos == pos))
+            if (!active)
             {
-                rebuildQueue.Add((pos, def, stuff));
-                Log.Message($"[AutoRebuildFence] Registered for rebuild: {def.defName} at {pos} (stuff={stuff?.defName ?? "none"}, mode={mode})");
-            }
-
-            if (!Active)
-            {
-                Active = true;
-                nextCheckTick = Find.TickManager.TicksGame + 120; // 約2秒後
+                active = true;
+                nextCheckTick = Find.TickManager.TicksGame + 300; // 5秒後
             }
         }
 
         public override void MapComponentTick()
         {
-            if (!Active) return;
-            if (map == null) { Active = false; return; }
+            // map が破棄済みまたは未初期化なら安全にスキップ
+            if (map == null || map.fogGrid == null || map.floodFiller == null)
+                return;
+
+            if (!active) return;
 
             int ticks = Find.TickManager.TicksGame;
             if (ticks < nextCheckTick) return;
-            nextCheckTick = ticks + 120;
+            nextCheckTick = ticks + 300;
 
             if (rebuildQueue.Count == 0)
             {
-                Active = false;
+                active = false;
                 return;
             }
-
-            rebuildQueue.RemoveAll(r => r.def == null);
 
             for (int i = rebuildQueue.Count - 1; i >= 0; i--)
             {
                 var (pos, def, stuff) = rebuildQueue[i];
-                if (!pos.InBounds(map) || !map.areaManager.Home[pos])
+
+                if (!pos.InBounds(map) || map.fogGrid.IsFogged(pos))
+                    continue;
+
+                var canPlace = GenConstruct.CanPlaceBlueprintAt(def, pos, Rot4.North, map, false, null);
+                if (!canPlace.Accepted)
+                    continue;
+
+                ThingDef stuffToUse = def.MadeFromStuff ? (stuff ?? GenStuff.DefaultStuffFor(def)) : null;
+
+                try
                 {
-                    rebuildQueue.RemoveAt(i);
-                    continue;
-                }
+                    GenConstruct.PlaceBlueprintForBuild(def, pos, map, Rot4.North, Faction.OfPlayer, stuffToUse);
 
-                if (pos.GetThingList(map).Any(t => t.def == def))
+                    if (AutoRebuildSettings.DebugMode)
+                        Log.Message($"[AutoRebuildFence] Blueprint placed for {def.defName} at {pos} ({stuffToUse?.defName ?? "no stuff"})");
+
+                    rebuildQueue.RemoveAt(i);
+                }
+                catch (System.Exception ex)
                 {
+                    Log.Error($"[AutoRebuildFence] Exception while placing blueprint for {def?.defName ?? "null"} at {pos}: {ex}");
                     rebuildQueue.RemoveAt(i);
-                    continue;
                 }
-
-                if (!GenConstruct.CanPlaceBlueprintAt(def, pos, Rot4.North, map, false, null).Accepted)
-                    continue;
-
-                ThingDef useStuff = def.MadeFromStuff ? stuff ?? GenStuff.DefaultStuffFor(def) : null;
-
-                GenConstruct.PlaceBlueprintForBuild(
-                    def,
-                    pos,
-                    map,
-                    Rot4.North,
-                    Faction.OfPlayer,
-                    useStuff
-                );
-
-                Log.Message($"[AutoRebuildFence] Placed rebuild blueprint for {def.defName} at {pos} (stuff={useStuff?.defName ?? "none"})");
-                rebuildQueue.RemoveAt(i);
             }
 
             if (rebuildQueue.Count == 0)
-            {
-                Active = false;
-                Log.Message("[AutoRebuildFence] Queue empty, stopping checks");
-            }
+                active = false;
         }
     }
 }
