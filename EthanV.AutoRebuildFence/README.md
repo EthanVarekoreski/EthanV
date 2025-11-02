@@ -1,10 +1,6 @@
-﻿***このModはChatGPT（OpenAI）の支援を受けて開発されました。***
-
----
-
-**概要**  
-戦闘や火災で破壊されたフェンス・ゲート・家畜用出入口を自動的に再建します。  
-同じ種類・素材のブループリントを自動で設置するため、見落としを防ぎます。  
+﻿**概要**  
+戦闘や火災で破壊されたフェンス・ゲート・家畜用出入口を自動的に再建築します。
+同じ種類・素材のブループリントを自動で設置し、再建を行います。
 
 襲撃の後、木の陰などに隠れたフェンスを直しそびれ、家畜が脱走することが頻発したため作成しました。  
 自動再建築指示を出す対象はフェンス・ゲート・家畜用出入口のみで、壁やドアなどその他の建築物には関与しません。  
@@ -20,7 +16,6 @@
 - Harmony(steam://url/CommunityFilePage/2009463077)
 
 **互換性**  
-- RimWorld 1.6で動作確認  
 - Harmonyベース。`Thing.DeSpawn` を直接置き換えるModでなければ競合しないはずです
 
 **ソースコード**  
@@ -28,17 +23,10 @@
   https://github.com/EthanVarekoreski/EthanV/tree/master/EthanV.AutoRebuildFence  
 
 **注意書き**  
-冒頭に記したとおり、本Modの開発ではChatGPTの助力を受けています。コードは短く、動作内容は理解したうえで作成していますが、初めてのModであることや技術的未熟・AIの誤出力に起因する不具合が残っている可能性があります。問題や改善提案があれば、コメントでお知らせいただけると助かります。
-
-
-
-
-
-
-
-***This mod was developed with assistance from ChatGPT (OpenAI).***
+本Modの開発ではChatGPTの支援を一部利用しています。動作は理解したうえで作成していますが、不具合が残る可能性があります。ご意見・改善提案があればコメントでお知らせください。
 
 ---
+
 
 **Overview**  
 Automatically rebuilds destroyed fences, gates, and animal flaps.  
@@ -53,13 +41,12 @@ When such a structure is destroyed by combat or fire, a blueprint of the same ty
 **Required Mod**
 - Harmony(steam://url/CommunityFilePage/2009463077)
 
-**Compatibility**  
-- Tested with RimWorld 1.6  
-- Harmony-based; it should not conflict with other construction mods unless they replace Thing.DeSpawn. 
+**Compatibility**   
+- Harmony-based; should not conflict with other construction mods unless they replace Thing.DeSpawn. 
 
-- **Source**  
+**Source**  
 - Source available on GitHub:  
   https://github.com/EthanVarekoreski/EthanV/tree/master/EthanV.AutoRebuildFence
 
 **Note**  
-As stated above, this mod was created with help from ChatGPT. While the code is short and its behavior is understood by the author, this is the first released mod and there may still be issues due to limited experience or AI mistakes. If you run into problems or have suggestions, please leave a comment.
+This mod was developed with partial assistance from ChatGPT. The functionality was implemented with understanding, but some issues may remain. Feedback and suggestions are welcome in the comments.
