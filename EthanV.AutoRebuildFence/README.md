@@ -2,9 +2,9 @@
 戦闘や火災で破壊されたフェンス・ゲート・家畜用出入口を自動的に再建築します。
 同じ種類・素材のブループリントを自動で設置し、再建を行います。
 
-襲撃の後、木の陰などに隠れたフェンスを直しそびれ、家畜が脱走することが頻発したため作成しました。  
-自動再建築指示を出す対象はフェンス・ゲート・家畜用出入口のみで、壁やドアなどその他の建築物には関与しません。  
-襲撃などで破壊されたコロニーを作り直す楽しみを完全になくすことはしたくなかったからです。  
+襲撃の後、木の陰などに隠れたフェンスを直しそびれ、家畜が脱走することが頻発したため作成しました。
+自動再建築の対象はフェンス・ゲート・家畜用出入口のみで、壁やドアなどには手を加えません。
+コロニーを立て直す過程そのものは残したかったからです。
 
 **詳細**  
 - プレイヤー所有のフェンス・ゲート・家畜用出入口のみ対象  
@@ -31,6 +31,10 @@
 **Overview**  
 Automatically rebuilds destroyed fences, gates, and animal flaps.  
 When such a structure is destroyed by combat or fire, a blueprint of the same type and material is automatically placed for reconstruction. 
+
+After raids, I often missed fences hidden behind trees, and my livestock kept escaping — so I made this mod.
+Only fences, gates, and animal flaps are automatically rebuilt; walls, doors, and other structures are left untouched.
+I wanted to keep the satisfaction of rebuilding the colony myself.
 
 **Details**  
 - Works only for player-owned fences, gates, and animal flaps.  
