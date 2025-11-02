@@ -3,9 +3,7 @@
   <name>Auto Rebuild Fence</name>
   <packageId>EthanV.AutoRebuildFence</packageId>
   <author>EthanVarekoreski</author>
-  <description>
-    Automatically rebuilds destroyed fences, gates, and animal flaps.
-  </description>
+  <description>Automatically rebuilds destroyed fences, gates, and animal flaps.</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

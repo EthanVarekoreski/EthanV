@@ -6,79 +6,57 @@ namespace EthanV.AutoRebuildFence
 {
     public class AutoRebuildManager : MapComponent
     {
-        private readonly List<(IntVec3 pos, ThingDef def, ThingDef stuff)> rebuildQueue = new();
-        private bool active;
-        private int nextCheckTick;
+        private readonly List<(int dueTick, IntVec3 pos, ThingDef def, ThingDef stuff)> delayed = new();
 
         public AutoRebuildManager(Map map) : base(map) { }
 
         public void RegisterDestroyed(Thing destroyed)
         {
             if (destroyed?.def == null) return;
-            if (destroyed.Faction != Faction.OfPlayer) return; // 他陣営のものは無視
+            if (destroyed.Faction != Faction.OfPlayer) return;  // 非プレイヤーのものは除外
             if (!AutoRebuildSettings.IsTargetDef(destroyed.def)) return;
 
-            rebuildQueue.Add((destroyed.Position, destroyed.def, destroyed.Stuff));
+            delayed.Add((Find.TickManager.TicksGame + 300, destroyed.Position, destroyed.def, destroyed.Stuff));
 
             if (AutoRebuildSettings.DebugMode)
                 Log.Message($"[AutoRebuildFence] Registered rebuild for {destroyed.def.defName} at {destroyed.Position}");
-
-            if (!active)
-            {
-                active = true;
-                nextCheckTick = Find.TickManager.TicksGame + 300; // 5秒後
-            }
         }
 
         public override void MapComponentTick()
         {
-            // map が破棄済みまたは未初期化なら安全にスキップ
-            if (map == null || map.fogGrid == null || map.floodFiller == null)
-                return;
+            if (delayed.Count == 0) return;
+            int now = Find.TickManager.TicksGame;
 
-            if (!active) return;
-
-            int ticks = Find.TickManager.TicksGame;
-            if (ticks < nextCheckTick) return;
-            nextCheckTick = ticks + 300;
-
-            if (rebuildQueue.Count == 0)
+            for (int i = delayed.Count - 1; i >= 0; i--)
             {
-                active = false;
-                return;
-            }
-
-            for (int i = rebuildQueue.Count - 1; i >= 0; i--)
-            {
-                var (pos, def, stuff) = rebuildQueue[i];
-
-                if (!pos.InBounds(map) || map.fogGrid.IsFogged(pos))
-                    continue;
-
-                var canPlace = GenConstruct.CanPlaceBlueprintAt(def, pos, Rot4.North, map, false, null);
-                if (!canPlace.Accepted)
-                    continue;
-
-                ThingDef stuffToUse = def.MadeFromStuff ? (stuff ?? GenStuff.DefaultStuffFor(def)) : null;
+                var (due, pos, def, stuff) = delayed[i];
+                if (now < due) continue; // まだ時期でない
 
                 try
                 {
+                    if (!pos.InBounds(map) || map.fogGrid.IsFogged(pos))
+                        continue;
+
+                    var can = GenConstruct.CanPlaceBlueprintAt(def, pos, Rot4.North, map, false, null);
+                    if (!can.Accepted)
+                        continue;
+
+                    ThingDef stuffToUse = def.MadeFromStuff ? (stuff ?? GenStuff.DefaultStuffFor(def)) : null;
+
                     GenConstruct.PlaceBlueprintForBuild(def, pos, map, Rot4.North, Faction.OfPlayer, stuffToUse);
 
                     if (AutoRebuildSettings.DebugMode)
                         Log.Message($"[AutoRebuildFence] Blueprint placed for {def.defName} at {pos} ({stuffToUse?.defName ?? "no stuff"})");
-
-                    rebuildQueue.RemoveAt(i);
                 }
                 catch (System.Exception ex)
                 {
                     Log.Error($"[AutoRebuildFence] Exception while placing blueprint for {def?.defName ?? "null"} at {pos}: {ex}");
-                    rebuildQueue.RemoveAt(i);
+                }
+                finally
+                {
+                    delayed.RemoveAt(i);
                 }
             }
-
-            if (rebuildQueue.Count == 0)
-                active = false;
         }
     }
 }

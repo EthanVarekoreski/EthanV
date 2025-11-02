@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="About\About.xml" />
+    <Content Include="About\preview.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
