@@ -16,6 +16,9 @@
 - 解体やブループリントのキャンセルは対象外  
 - 瓦礫生成など他の破壊時処理との競合を避けるため、破壊から約5秒後に再建築指示を出します
 
+**前提MOD**
+- Harmony(steam://url/CommunityFilePage/2009463077)
+
 **互換性**  
 - RimWorld 1.6で動作確認  
 - Harmonyベース。`Thing.DeSpawn` を直接置き換えるModでなければ競合しないはずです
@@ -40,11 +43,15 @@
 **Overview**  
 Automatically rebuilds destroyed fences, gates, and animal flaps.  
 When such a structure is destroyed by combat or fire, a blueprint of the same type and material is automatically placed for reconstruction. 
+
 **Details**  
 - Works only for player-owned fences, gates, and animal flaps.  
 - More precisely, it targets any buildable whose defName contains “fence”, “gate”, or “animalflap”. 
 - Deconstruction and blueprint cancellations are ignored.  
 - To avoid conflicts with debris creation or other destruction-related processes, the rebuild command is issued about 5 seconds after destruction.
+
+**Required Mod**
+- Harmony(steam://url/CommunityFilePage/2009463077)
 
 **Compatibility**  
 - Tested with RimWorld 1.6  
