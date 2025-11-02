@@ -15,6 +15,7 @@ namespace EthanV.AutoRebuildFence
         public void RegisterDestroyed(Thing destroyed)
         {
             if (destroyed?.def == null) return;
+            if (destroyed.Faction != Faction.OfPlayer) return; // 他陣営のものは無視
             if (!AutoRebuildSettings.IsTargetDef(destroyed.def)) return;
 
             rebuildQueue.Add((destroyed.Position, destroyed.def, destroyed.Stuff));
